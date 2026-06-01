@@ -1,0 +1,745 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "roboto";
+}
+body p, body h1, body h2, body h3, body h4 {
+  margin: 0;
+}
+body input, body button, body select {
+  border: 1px solid gray;
+  border-radius: 1em;
+  height: 3.5em;
+  padding: 0 1em;
+  box-sizing: border-box;
+}
+body button {
+  border: 0;
+  background-color: orange;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+}
+body button:hover {
+  background-color: rgb(212, 138, 0);
+}
+
+.login {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  height: 100vh;
+}
+.login form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+.login form input, .login form button {
+  width: 20em;
+}
+
+.layout {
+  display: grid;
+}
+.layout .left {
+  display: none;
+  height: 100%;
+  padding: 2em;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 1.5em;
+  border-right: 1px solid lightgray;
+}
+.layout .left .logo {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.layout .left .switcher {
+  width: 100%;
+  height: 2.5em;
+}
+.layout .left .tabs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.layout .left .tabs li {
+  cursor: pointer;
+  padding: 1em;
+  box-sizing: border-box;
+  height: 2.5em;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  gap: 0.5em;
+}
+.layout .left .tabs .selected {
+  background-color: #eee;
+}
+.layout .right {
+  width: 100%;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 4.5em auto;
+}
+.layout .right .top-nav {
+  width: 100%;
+  height: 100%;
+  padding: 1em 2em;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 1em;
+}
+.layout .right .top-nav .switcher {
+  margin-right: auto;
+  width: 14em;
+}
+.layout .right .top-nav .search {
+  display: none;
+  height: 100%;
+  position: relative;
+  align-items: center;
+}
+.layout .right .top-nav .search .searchIcon {
+  position: absolute;
+  left: 0.5em;
+}
+.layout .right .top-nav .search input {
+  height: 100%;
+  box-sizing: border-box;
+  padding-left: 3em;
+  border-radius: 5px;
+  background-color: transparent;
+}
+.layout .right .top-nav button {
+  height: 100%;
+  border-radius: 5px;
+  color: black;
+  font-weight: 600;
+  border: 1px solid rgb(170, 170, 170);
+  background-color: transparent;
+}
+.layout .right .content {
+  padding: 1em 2em;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.boards {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-self: start;
+  gap: 1em;
+}
+.boards .card {
+  cursor: pointer;
+  width: 100%;
+  height: 15em;
+  border-radius: 10px;
+  background-color: #eee;
+  background-color: aqua;
+}
+.boards .add {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.boards .add p {
+  font-weight: 300;
+  font-size: 2.5em;
+}
+.boards .board {
+  display: grid;
+  grid-template-rows: 75% 25%;
+  position: relative;
+}
+.boards .board p.delete {
+  position: absolute;
+  top: 0.5em;
+  right: 0.8em;
+  font-size: larger;
+  color: rgb(49, 49, 49);
+  cursor: pointer;
+}
+.boards .board .image {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px 10px 0 0;
+}
+.boards .board .info {
+  width: 100%;
+  height: 100%;
+  padding: 1em;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  background-color: #eee;
+  border-radius: 0 0 10px 10px;
+}
+.boards .board .info span {
+  visibility: hidden;
+  font-size: smaller;
+  color: rgb(80, 80, 80);
+}
+.boards .board:hover span {
+  visibility: visible;
+}
+
+.app {
+  width: 100%;
+  height: 100vh;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+.app canvas {
+  width: 100%;
+  height: 100%;
+  background-color: #eee;
+}
+.app .flowing {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  height: 2.5em;
+  width: 10em;
+  background-color: white;
+  box-shadow: 5px 5px 0.5em rgba(0, 0, 0, 0.126);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.app .flowing .user {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.app .flowing .user .name {
+  position: absolute;
+  top: 3em;
+  background-color: black;
+  color: white;
+  padding: 0.5em;
+  border-radius: 10px;
+  display: none;
+}
+.app .flowing .user:hover .name {
+  display: block;
+}
+.app .context {
+  left: 1em;
+}
+.app .toolset, .app .undo-redo {
+  width: 2.5em;
+  height: fit-content;
+  padding: 0.3em;
+  box-sizing: border-box;
+  left: 1em;
+  top: calc(50% - 7.5em);
+  flex-direction: column;
+  gap: 0.3em;
+}
+.app .toolset .tool, .app .undo-redo .tool {
+  width: 100%;
+  height: 100%;
+  padding: 0.3em;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+.app .toolset .selected, .app .undo-redo .selected {
+  background-color: aquamarine;
+}
+.app .undo-redo {
+  top: 60%;
+}
+.app .chat {
+  cursor: pointer;
+  top: unset;
+  bottom: 4em;
+  width: fit-content;
+  aspect-ratio: 1;
+  right: 4em;
+  font-size: larger;
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+.app {
+  position: relative;
+}
+.app .chat-panel {
+  position: absolute;
+  height: 100%;
+  right: 0;
+  background-color: white;
+  width: 18em;
+  box-sizing: border-box;
+  transform: translateX(18em);
+  transition: all 0.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+.app .chat-panel .section {
+  padding: 1em;
+}
+.app .chat-panel .top {
+  background-color: aquamarine;
+  display: flex;
+  justify-content: space-between;
+}
+.app .chat-panel .top .close {
+  cursor: pointer;
+}
+.app .chat-panel .messages {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5em;
+  height: 100%;
+  overflow-y: auto;
+}
+.app .chat-panel .messages .area {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.app .chat-panel .messages .area .bubble {
+  background-color: violet;
+  border-radius: 1em 1em 1em 0;
+  padding: 0.5em;
+}
+.app .chat-panel .messages .area .bubble .time {
+  margin-left: auto;
+  font-size: smaller;
+  font-weight: 200;
+}
+.app .chat-panel .messages .mine {
+  align-self: end;
+}
+.app .chat-panel .messages .mine .bubble {
+  border-radius: 1em 1em 0 1em;
+  background-color: aquamarine;
+}
+.app .chat-panel form {
+  background-color: aquamarine;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+.app .chat-panel form input {
+  height: 3em;
+}
+.app .chat-panel form .send {
+  cursor: pointer;
+  width: 2.5em;
+  height: 2.5em;
+  box-sizing: border-box;
+  background-color: blueviolet;
+  padding: 0.5em;
+  border-radius: 50%;
+}
+.app .show {
+  transform: translateX(0);
+}
+
+.empty {
+  width: 100%;
+  max-width: 30em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+}
+.empty img {
+  width: 55%;
+  padding-bottom: 1em;
+  box-sizing: border-box;
+}
+.empty button {
+  background-color: rgb(37, 37, 37);
+}
+
+.members {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  align-self: start;
+}
+.members ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+.members ul li {
+  cursor: pointer;
+  width: 10em;
+  height: 3em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.members ul li.selected {
+  border-bottom: 1px solid black;
+}
+.members .list {
+  display: flex;
+  flex-direction: column;
+  max-width: 40em;
+  gap: 1em;
+  padding: 1em 0;
+}
+.members .list .member {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+  height: 3em;
+  padding: 0.5em;
+  background-color: #eee;
+  box-sizing: border-box;
+}
+.members .list .member p {
+  display: flex;
+  gap: 0.2em;
+  align-items: center;
+}
+.members .list .member p span {
+  font-size: 0.7em;
+}
+.members .list .member button {
+  background-color: transparent;
+  color: black;
+  height: 100%;
+  border: 1px solid gray;
+  margin-left: auto;
+  font-weight: 400;
+}
+.members .list .member .area {
+  display: flex;
+  height: 100%;
+  margin-left: auto;
+  gap: 0.5em;
+  align-items: center;
+}
+.members .list .member .area span {
+  font-size: smaller;
+  color: darkred;
+}
+.members .list .buttons {
+  width: 70%;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1em;
+  align-self: end;
+  transform: scale(0.8);
+  transform-origin: center right;
+}
+.members .list .buttons .cancel {
+  background-color: transparent;
+  border: 2px solid black;
+  color: black;
+}
+.members .list .buttons .confirm {
+  background-color: black;
+}
+
+.settings {
+  width: 100%;
+  height: 100%;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 2em;
+}
+.settings div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+.settings div form {
+  display: flex;
+  gap: 0.5em;
+}
+.settings div input, .settings div button {
+  width: fit-content;
+}
+.settings div button {
+  background-color: blue;
+  opacity: 0.8;
+}
+.settings .delete button {
+  background-color: red;
+}
+
+.switcher {
+  cursor: pointer;
+  width: 12em;
+  height: 100%;
+}
+.switcher .box {
+  height: 100%;
+  border-radius: 5px;
+  border: 1px solid rgb(170, 170, 170);
+  font-weight: 600;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  background-image: url("/images/up-down-arrow.svg");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+.switcher .option {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+  font-size: smaller;
+  height: 100%;
+}
+.switcher .dropdown {
+  height: 0;
+  opacity: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  background-color: beige;
+  border: 1px solid gray;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  top: 0.3em;
+  transition: all 0.2s ease;
+}
+.switcher .show {
+  height: fit-content;
+  opacity: 1;
+  padding: 0.5em 0;
+  overflow: visible;
+}
+.switcher button {
+  height: 100%;
+  border-radius: 5px;
+  color: black;
+  font-weight: 600;
+  border: 1px solid rgb(170, 170, 170);
+  background-color: transparent;
+}
+.switcher button:hover {
+  background-color: transparent;
+}
+
+.user {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+.user .box {
+  height: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: blueviolet;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  color: white;
+  font-weight: 500;
+  user-select: none;
+  cursor: pointer;
+}
+.user {
+  position: relative;
+}
+.user .user-dropdown {
+  max-height: 0;
+  opacity: 0;
+  position: absolute;
+  top: 110%;
+  background-color: #eee;
+  padding: 0.5em;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+.user .user-dropdown .logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+}
+.user .show {
+  max-height: fit-content;
+  opacity: 1;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.53);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5em;
+  box-sizing: border-box;
+}
+.overlay .modal {
+  width: 18em;
+  border-radius: 10px;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  background-color: #eee;
+}
+.overlay .modal form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.notifications {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+.notifications .count {
+  position: absolute;
+  background-color: red;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  top: -0.5em;
+  right: -0.5em;
+}
+.notifications .dropdown {
+  height: 0;
+  opacity: 0;
+  padding: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 100%;
+  background-color: #eee;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 1em;
+  width: max-content;
+  right: 0;
+  box-sizing: border-box;
+  border-radius: 0.5em;
+  box-shadow: 10px 10px 0.5em rgba(0, 0, 0, 0.192);
+  transition: height 0.2s ease, opacity 0.2s ease;
+}
+.notifications .dropdown .notification {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  cursor: auto;
+}
+.notifications .dropdown .notification .icon {
+  border: 2px solid black;
+  padding: 0.3em;
+  grid-row: 2 span;
+}
+.notifications .dropdown .notification .detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.notifications .dropdown .notification .detail p {
+  font-size: smaller;
+  height: fit-content;
+}
+.notifications .dropdown .notification .detail p.time {
+  color: gray;
+  grid-column: 2;
+  grid-row: 2;
+}
+.notifications .dropdown .notification .actions {
+  grid-row: 2 span;
+}
+.notifications .dropdown .all {
+  align-self: center;
+}
+.notifications .show {
+  height: fit-content;
+  opacity: 1;
+  padding: 0.5em;
+  overflow: visible;
+}
+
+@media (min-width: 700px) {
+  .boards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 850px) {
+  .boards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 1000px) {
+  .layout {
+    grid-template-columns: 20% 80%;
+  }
+  .layout .left {
+    display: flex;
+  }
+  .layout .right .top-nav .switcher {
+    display: none;
+  }
+  .layout .right .top-nav .search {
+    display: flex;
+    margin-right: auto;
+  }
+  .layout .right .top-nav .search input {
+    width: 30em;
+  }
+}
+@media (min-width: 1150px) {
+  .boards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/*# sourceMappingURL=style.css.map */

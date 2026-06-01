@@ -1,0 +1,29 @@
+# Dependencies
+Backend/node_modules
+Frontend/node_modules
+
+# Env files
+Backend/.env
+Frontend/.env
+
+# Build folders
+Frontend/build
+Frontend/dist
+Backend/dist
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Coverage
+coverage/
+
+# Note files
+note.txt
