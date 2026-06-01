@@ -158,9 +158,18 @@ function Room() {
         const startTop = rect.top;
         const startBottom = rect.bottom;
         const startRight = rect.right;
+        //Decide boundary click
+        const edgeLeft = Math.abs(startX-startLeft)<=5;
+        const edgeRight = Math.abs(startX-startRight)<=5;
+        const edgeTop = Math.abs(startY-startTop)<=5;
+        const edgeBottom = Math.abs(startY-startBottom)<=5;
+        const cornerTopRight = edgeTop && edgeRight;
+        const cornerTopLeft = edgeTop && edgeLeft;
+        const cornerBottomRight = edgeBottom && edgeRight;
+        const cornerBottomLeft = edgeBottom && edgeLeft;
 
         //Drag
-        if(offsetX > 3 && offsetY > 3) {
+        if(!edgeLeft && !edgeRight && !edgeTop && !edgeBottom) {
             console.log("DRAG");
             const move = (ev) => {
                 setStickyArr(prev =>
@@ -188,19 +197,110 @@ function Room() {
             const resize = (ev) => {
                 const dx = ev.clientX - startX;
                 const dy = ev.clientY - startY;
-                console.log(startWidth + dx, startHeight + dy);
 
-                setStickyArr(prev =>
-                    prev.map(n =>
-                        n.id === note.id
-                            ? {
-                                ...n,
-                                height: startHeight + dy,
-                                width: startWidth + dx
-                            }
-                            : n
-                    )
-                );
+                if(cornerTopRight) {
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth + dx,
+                                    height: startHeight - dy,
+                                    y: note.y + dy
+                                }
+                                : n
+                        )
+                    );
+                }
+                else if(cornerTopLeft) {
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth - dx,
+                                    x: note.x + dx,
+                                    height: startHeight - dy,
+                                    y: note.y + dy
+                                }
+                                : n
+                        )
+                    );                    
+                }
+                else if(cornerBottomRight) {
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth + dx,
+                                    height: startHeight + dy,
+                                }
+                                : n
+                        )
+                    );
+                }
+                else if(cornerBottomLeft) {
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth - dx,
+                                    x: note.x + dx,
+                                    height: startHeight + dy,
+                                }
+                                : n
+                        )
+                    );
+                }
+
+                else if(edgeRight) 
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth + dx
+                                }
+                                : n
+                        )
+                    );
+                else if(edgeLeft) 
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    width: startWidth - dx,
+                                    x: note.x + dx
+                                }
+                                : n
+                        )
+                    );
+                else if(edgeBottom)
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    height: startHeight + dy,
+                                }
+                                : n
+                        )
+                    );
+                else if(edgeTop)
+                    setStickyArr(prev =>
+                        prev.map(n =>
+                            n.id === note.id
+                                ? {
+                                    ...n,
+                                    height: startHeight - dy,
+                                    y: note.y + dy
+                                }
+                                : n
+                        )
+                    );
             }
 
             window.addEventListener("mousemove", resize);
@@ -208,7 +308,31 @@ function Room() {
                 window.removeEventListener("mousemove", resize);
             }, { once: true });
         }
+    }
+    const [cursor, setCursor] = useState("move");
+    const stickyMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
 
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const edge = 5;
+
+        const left = x <= edge;
+        const right = x >= rect.width - edge;
+        const top = y <= edge;
+        const bottom = y >= rect.height - edge;
+
+        if ((left && top) || (right && bottom))
+            setCursor("nwse-resize");
+        else if ((right && top) || (left && bottom))
+            setCursor("nesw-resize");
+        else if (left || right)
+            setCursor("ew-resize");
+        else if (top || bottom)
+            setCursor("ns-resize");
+        else
+            setCursor("move");
     }
 
 
@@ -230,6 +354,7 @@ function Room() {
                     contentEditable
                     key={note.id}
                     onMouseDown={(e)=>dragNote(e, note)}
+                    onMouseMove={stickyMouseMove}
                     style={{
                         width: note.width,
                         height: note.height,
@@ -240,7 +365,7 @@ function Room() {
                         zIndex: "2",
                         left: note.x,
                         top: note.y,
-                        cursor: "move"
+                        cursor
                     }}
                 >
                     {note.content}

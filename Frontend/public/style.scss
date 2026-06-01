@@ -373,6 +373,11 @@ body {
     .show {
         transform: translateX(0);
     }
+
+
+    .sticky:hover {
+        border: 1px dashed #666;
+    }
 }
 
 .empty {

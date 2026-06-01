@@ -361,6 +361,9 @@ body button:hover {
 .app .show {
   transform: translateX(0);
 }
+.app .sticky:hover {
+  border: 1px dashed #666;
+}
 
 .empty {
   width: 100%;
