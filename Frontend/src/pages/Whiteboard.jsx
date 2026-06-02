@@ -38,7 +38,6 @@ function Room() {
 
     // Canvas setup
     const canvasRef = useRef(null);
-    const [drawing, setDrawing] = useState(false);
     const [color, setColor] = useState("black");
     const [width, setWidth] = useState(3);
     
@@ -82,25 +81,27 @@ function Room() {
 
     
     // Canvas Draw
-    const startDraw = (e) => {
-        if(seletedTool!=="pen" && seletedTool!=="eraser") return;
-
-        setDrawing(true);
+    const draw = (e) => {
         const ctx = canvasRef.current.getContext("2d");
         ctx.beginPath();
         ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+
+        const move = (ev) => {
+            const rect = canvasRef.current.getBoundingClientRect();
+
+            ctx.lineTo(
+                ev.clientX - rect.left,
+                ev.clientY - rect.top
+            );
+            ctx.stroke();
+        };
+
+        window.addEventListener("mousemove", move);
+        window.addEventListener("mouseup", () => {
+            window.removeEventListener("mousemove", move);
+        })
     };
 
-    const draw = (e) => {
-        if (!drawing) return;
-        const ctx = canvasRef.current.getContext("2d");
-        ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-        ctx.stroke();
-    };
-    
-    const stopDraw = () => {
-        setDrawing(false);
-    };
 
     //Chat panel
     const [show, setShow] = useState(false);
@@ -129,7 +130,7 @@ function Room() {
 
     //Canvas sticky
     const [stickyArr, setStickyArr] = useState([]);
-    const onClick = (e) => {
+    const addNote = (e) => {
         if(seletedTool!=="sticky") return;
 
         const newSticky = {
@@ -138,7 +139,7 @@ function Room() {
             y: e.clientY,
             width: 160,
             height: 128,
-            content: "new note"
+            content: "New note"
         }
         setStickyArr(prev => [...prev, newSticky]);
     }
@@ -335,16 +336,69 @@ function Room() {
             setCursor("move");
     }
 
+    //Selection net
+    const [selectionNet, setSelectionNet] = useState({
+        x: 0,
+        y: 0,
+        height: 0,
+        width: 0,
+        visible: false
+    })
+    const putSelectionNet = (e) => {
+        const startX = e.clientX;
+        const startY = e.clientY;
+        setSelectionNet(prev => ({...prev, x:startX, y:startY, visible: true}));
+
+        const move = (ev) => {
+            const currentX = ev.clientX;
+            const currentY = ev.clientY;
+
+            setSelectionNet({
+                x: Math.min(startX, currentX),
+                y: Math.min(startY, currentY),
+                width: Math.abs(currentX - startX),
+                height: Math.abs(currentY - startY),
+                visible: true
+            });
+        }
+
+        window.addEventListener("mousemove", move);
+        window.addEventListener("mouseup", () => {
+            setSelectionNet(prev => ({x:0, y:0, height:0, width:0, visible: false}))
+            window.removeEventListener("mousemove", move);
+        }, { once: true });
+    }
+
+    const onMouseDown = (e) => {
+        if(seletedTool==="pen" || seletedTool==="eraser")
+            draw(e);
+        else if(seletedTool==="cursor")
+            putSelectionNet(e);
+    }
+
 
     return (
         <div className="app" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
             <canvas 
                 ref={canvasRef} 
-                onMouseDown={startDraw} 
-                onMouseMove={draw} 
-                onMouseUp={stopDraw}
+                onMouseDown={onMouseDown} 
+                onClick={addNote}
+            />
 
-                onClick={onClick}
+            {/* Flowing selection net */}
+            <div 
+                className="selectionNet"
+                style={{
+                    position: "absolute",
+                    backgroundColor: "rgba(59, 130, 246, 0.1)",
+                    border: "1px solid blue",
+                    left: selectionNet.x,
+                    top: selectionNet.y,
+                    width: selectionNet.width,
+                    height: selectionNet.height,
+                    visibility: selectionNet.visible? "visible" : "hidden",
+                    pointerEvents: "none"
+                }}
             />
 
             {/* Flowing sticky */}
@@ -365,7 +419,12 @@ function Room() {
                         zIndex: "2",
                         left: note.x,
                         top: note.y,
-                        cursor
+                        fontFamily: "Comic Sans MS",
+                        cursor,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: "1.1em"
                     }}
                 >
                     {note.content}
