@@ -737,6 +737,33 @@ body {
     }
 }
 
+.layerSettings {
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -70%;
+    gap: 0.5em;
+    .colors {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: auto auto;
+        gap: 0.2em;
+        div {
+            border-radius: 10px;
+            height: 1.5em;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+    }
+    .icon {
+        cursor: pointer;
+    }
+}
+
 
 // Media queries
 @media(min-width: 700px) {

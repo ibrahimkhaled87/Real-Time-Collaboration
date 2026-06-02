@@ -1,15 +1,18 @@
 import { User2Icon, Eraser, Pen, StickyNote, TextCursorIcon, MousePointer, Undo, Redo, MessageSquareMoreIcon, Send } from "lucide-react";
-import { RoomProvider, useUpdateMyPresence, useOthers, useEventListener } from "@liveblocks/react";
+import { RoomProvider, useUpdateMyPresence, useOthers, useEventListener, useBroadcastEvent } from "@liveblocks/react";
 import useTokenDecode from "../hooks/useTokenDecode";
 import { useState, useRef, useEffect } from "react";
 import api from "../utils/axios";
 import { useFetchTeamMessages } from "../hooks/useFetch";
 import { useParams } from "react-router-dom";
+import LayerSettings from "../components/LayerSettings";
 
 function Room() {
     const payload = useTokenDecode();
 
     const [position, setPosition] = useState({x:0, y:0});
+
+    const broadcast = useBroadcastEvent();
 
     // Read other cursors
     const others = useOthers();
@@ -83,21 +86,39 @@ function Room() {
     // Canvas Draw
     const draw = (e) => {
         const ctx = canvasRef.current.getContext("2d");
+        const startX = e.nativeEvent.offsetX;
+        const startY = e.nativeEvent.offsetY
         ctx.beginPath();
-        ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+        ctx.moveTo(startX, startY);
+        broadcast({
+            type: "start-draw",
+            x: startX,
+            y: startY,
+            width,
+            color
+        });
 
         const move = (ev) => {
             const rect = canvasRef.current.getBoundingClientRect();
+            const x = ev.clientX - rect.left;
+            const y = ev.clientY - rect.top;
 
             ctx.lineTo(
-                ev.clientX - rect.left,
-                ev.clientY - rect.top
+                x,
+                y
             );
             ctx.stroke();
+
+            broadcast({
+                type: "draw",
+                x,
+                y
+            });
         };
 
         window.addEventListener("mousemove", move);
         window.addEventListener("mouseup", () => {
+            broadcast("stop-draw");
             window.removeEventListener("mousemove", move);
         })
     };
@@ -118,15 +139,6 @@ function Room() {
         setNewMessage("");
     }
 
-    //Listen backend
-    useEventListener(({ event }) => {
-    switch (event.type) {
-        case "new-message":
-            setMessages(prev => [event.message, ...prev])
-            break;
-    }
-    });
-
 
     //Canvas sticky
     const [stickyArr, setStickyArr] = useState([]);
@@ -139,9 +151,15 @@ function Room() {
             y: e.clientY,
             width: 160,
             height: 128,
+            color: "yellow",
             content: "New note"
         }
         setStickyArr(prev => [...prev, newSticky]);
+
+        broadcast({
+            type: "new-note",
+            note: newSticky
+        });
     }
     const dragNote = (e, note) => {
         if (e.target !== e.currentTarget) return; //inner != outer
@@ -173,17 +191,20 @@ function Room() {
         if(!edgeLeft && !edgeRight && !edgeTop && !edgeBottom) {
             console.log("DRAG");
             const move = (ev) => {
+                const updatedNote = {
+                    ...note,
+                    x: ev.clientX - offsetX,
+                    y: ev.clientY - offsetY
+                };
+
                 setStickyArr(prev =>
-                    prev.map(n =>
-                        n.id === note.id
-                            ? {
-                                ...n,
-                                x: ev.clientX - offsetX,
-                                y: ev.clientY - offsetY
-                            }
-                            : n
-                    )
+                    prev.map(n => n.id === note.id ? updatedNote : n)
                 );
+
+                broadcast({
+                    type: "note-update",
+                    note: updatedNote
+                });
             };
 
             window.addEventListener("mousemove", move);
@@ -199,110 +220,79 @@ function Room() {
                 const dx = ev.clientX - startX;
                 const dy = ev.clientY - startY;
 
-                if(cornerTopRight) {
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth + dx,
-                                    height: startHeight - dy,
-                                    y: note.y + dy
-                                }
-                                : n
-                        )
-                    );
+                let updates = {};
+
+                if (cornerTopRight) {
+                    updates = {
+                        width: startWidth + dx,
+                        height: startHeight - dy,
+                        y: note.y + dy
+                    };
                 }
-                else if(cornerTopLeft) {
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth - dx,
-                                    x: note.x + dx,
-                                    height: startHeight - dy,
-                                    y: note.y + dy
-                                }
-                                : n
-                        )
-                    );                    
+                else if (cornerTopLeft) {
+                    updates = {
+                        width: startWidth - dx,
+                        x: note.x + dx,
+                        height: startHeight - dy,
+                        y: note.y + dy
+                    };
                 }
-                else if(cornerBottomRight) {
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth + dx,
-                                    height: startHeight + dy,
-                                }
-                                : n
-                        )
-                    );
+                else if (cornerBottomRight) {
+                    updates = {
+                        width: startWidth + dx,
+                        height: startHeight + dy
+                    };
                 }
-                else if(cornerBottomLeft) {
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth - dx,
-                                    x: note.x + dx,
-                                    height: startHeight + dy,
-                                }
-                                : n
-                        )
-                    );
+                else if (cornerBottomLeft) {
+                    updates = {
+                        width: startWidth - dx,
+                        x: note.x + dx,
+                        height: startHeight + dy
+                    };
                 }
 
-                else if(edgeRight) 
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth + dx
-                                }
-                                : n
-                        )
-                    );
-                else if(edgeLeft) 
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    width: startWidth - dx,
-                                    x: note.x + dx
-                                }
-                                : n
-                        )
-                    );
-                else if(edgeBottom)
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    height: startHeight + dy,
-                                }
-                                : n
-                        )
-                    );
-                else if(edgeTop)
-                    setStickyArr(prev =>
-                        prev.map(n =>
-                            n.id === note.id
-                                ? {
-                                    ...n,
-                                    height: startHeight - dy,
-                                    y: note.y + dy
-                                }
-                                : n
-                        )
-                    );
-            }
+                else if (edgeRight) {
+                    updates = {
+                        width: startWidth + dx
+                    };
+                }
+                else if (edgeLeft) {
+                    updates = {
+                        width: startWidth - dx,
+                        x: note.x + dx
+                    };
+                }
+                else if (edgeBottom) {
+                    updates = {
+                        height: startHeight + dy
+                    };
+                }
+                else if (edgeTop) {
+                    updates = {
+                        height: startHeight - dy,
+                        y: note.y + dy
+                    };
+                }
+
+
+                const updatedNote = {
+                    ...note,
+                    ...updates
+                };
+
+                setStickyArr(prev =>
+                    prev.map(n =>
+                        n.id === note.id
+                            ? updatedNote
+                            : n
+                    )
+                );
+                
+                broadcast({
+                    type: "note-update",
+                    note: updatedNote
+                })
+            };
 
             window.addEventListener("mousemove", resize);
             window.addEventListener("mouseup", () => {
@@ -335,6 +325,21 @@ function Room() {
         else
             setCursor("move");
     }
+    const stickyInput = (e, note) => {
+        const updatedContent = e.currentTarget.innerText;
+        const updatedNote = {...note, content: updatedContent};   
+    
+        setStickyArr(prev =>
+            prev.map(n =>
+                n.id === note.id ? updatedNote : n
+            )
+        );
+
+        broadcast({
+            type: "note-update",
+            note: updatedNote
+        })
+    }
 
     //Selection net
     const [selectionNet, setSelectionNet] = useState({
@@ -345,6 +350,7 @@ function Room() {
         visible: false
     })
     const putSelectionNet = (e) => {
+        setSelctedId(null);
         const startX = e.clientX;
         const startY = e.clientY;
         setSelectionNet(prev => ({...prev, x:startX, y:startY, visible: true}));
@@ -375,6 +381,50 @@ function Room() {
         else if(seletedTool==="cursor")
             putSelectionNet(e);
     }
+
+
+    //Listen backend
+    useEventListener(({ event }) => {
+    const ctx = canvasRef.current.getContext("2d");
+    switch (event.type) {
+        case "new-message":
+            setMessages(prev => [event.message, ...prev])
+            break;
+        case "new-note":
+            setStickyArr(prev => [...prev, event.note])
+            break;
+        case "note-update":
+            setStickyArr(prev => prev.map(n => n.id===event.note.id ? event.note : n))
+            break;
+        case "start-draw":
+            ctx.strokeStyle = event.color;
+            ctx.lineWidth = event.width;
+            ctx.beginPath();
+            ctx.moveTo(event.x, event.y);
+            break;
+        case "draw":
+            ctx.lineTo(event.x, event.y);
+            ctx.stroke();
+            break;
+        case "stop-draw":
+            ctx.closePath();
+            break;
+
+    }
+    });
+
+    const [selectedId, setSelctedId] = useState(null);
+    const updateSelectedId = (id) => {
+        if(seletedTool!=="cursor") return;
+            setSelctedId(id);
+    }
+    useEffect(() => {
+        if(seletedTool!=="cursor")
+            setSelctedId(null);
+    }, [seletedTool])
+    useEffect(()=> {
+        console.log(selectedId);
+    }, [selectedId])
 
 
     return (
@@ -409,12 +459,14 @@ function Room() {
                     key={note.id}
                     onMouseDown={(e)=>dragNote(e, note)}
                     onMouseMove={stickyMouseMove}
+                    onBlur={(e)=>stickyInput(e, note)}
+                    onClick={()=>updateSelectedId(note.id)}
                     style={{
                         width: note.width,
                         height: note.height,
                         padding: "1em",
                         borderRadius: "0.3em",
-                        backgroundColor: "yellow",
+                        backgroundColor: note.color,
                         position: "absolute",
                         zIndex: "2",
                         left: note.x,
@@ -428,6 +480,7 @@ function Room() {
                     }}
                 >
                     {note.content}
+                    {selectedId===note.id && <LayerSettings stickyArr={stickyArr} setStickyArr={setStickyArr} selectedId={selectedId} /> }
                 </div>
             ))}
             
