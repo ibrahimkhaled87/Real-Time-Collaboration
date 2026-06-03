@@ -38,7 +38,7 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
-        <LiveblocksProvider publicApiKey="pk_dev_p3H3BC3tUJpWnyS4QkieiyocibtEoXBqo4Ui8w-bOMtMAOWE5zRV967KjFI8T3Vn" >
+        <LiveblocksProvider publicApiKey={process.env.REACT_APP_LIVEBLOCKS_PUBLIC_API_KEY} >
             <TeamsProvider>
                 <RouterProvider router={router} />
             </TeamsProvider>

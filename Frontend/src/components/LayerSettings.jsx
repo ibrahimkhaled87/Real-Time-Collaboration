@@ -1,6 +1,9 @@
+import { useBroadcastEvent } from "@liveblocks/react";
 import { BringToFrontIcon, SendToBackIcon, Trash2 } from "lucide-react"
 
 export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
+    const broadcast = useBroadcastEvent();
+
     const handleClick = (color) => {
         if(!selectedId) return;
         const note = stickyArr.find(el => el.id===selectedId);
@@ -9,6 +12,42 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
             color: color
         }
         setStickyArr(prev => prev.map(n => n.id===selectedId ? updatedNote : n));
+        broadcast({
+            type: "note-update",
+            note: updatedNote
+        })
+    }
+
+    const handleBring = (position) => {
+        if(!selectedId) return;
+        const note = stickyArr.find(el => el.id===selectedId);
+        if(position==="front") {
+            const updatedArr = [...stickyArr.filter(el=>el.id!==selectedId), note];
+            setStickyArr(updatedArr);
+            broadcast({
+                type: "note-bring",
+                position: "front",
+                note: note
+            })
+        }
+        else if(position==="back") {
+            const updatedArr = [note, ...stickyArr.filter(el=>el.id!==selectedId)];
+            setStickyArr(updatedArr);
+            broadcast({
+                type: "note-bring",
+                position: "back",
+                note: note
+            })
+        }
+        else {
+            const updatedArr = [...stickyArr.filter(el=>el.id!==selectedId)];
+            setStickyArr(updatedArr);
+            broadcast({
+                type: "note-bring",
+                position: "delete",
+                note: note
+            })
+        }
     }
 
     return <div className="layerSettings" contentEditable={false}>
@@ -23,11 +62,11 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
             <div className="black" style={{backgroundColor: "black"}} onClick={()=>handleClick("black")}></div>
         </div>
         <div className="position">
-            <BringToFrontIcon className="icon" />
-            <SendToBackIcon className="icon" />
+            <BringToFrontIcon className="icon" onClick={()=>handleBring("front")} />
+            <SendToBackIcon className="icon" onClick={()=>handleBring("back")} />
         </div>
         <div className="delete">
-            <Trash2 className="icon" />
+            <Trash2 className="icon" onClick={()=>handleBring("delete")} />
         </div>
     </div>
 }

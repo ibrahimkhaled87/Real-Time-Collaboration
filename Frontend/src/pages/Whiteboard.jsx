@@ -396,6 +396,14 @@ function Room() {
         case "note-update":
             setStickyArr(prev => prev.map(n => n.id===event.note.id ? event.note : n))
             break;
+        case "note-bring": {
+            if(event.position==="front")
+                setStickyArr(prev => [...prev.filter(el=>el.id!==event.note.id), event.note])
+            else if(event.position==="back")
+                setStickyArr(prev => [event.note, ...prev.filter(el=>el.id!==event.note.id)])
+            else
+                setStickyArr(prev => [...prev.filter(el=>el.id!==event.note.id)])
+        }
         case "start-draw":
             ctx.strokeStyle = event.color;
             ctx.lineWidth = event.width;
@@ -429,12 +437,6 @@ function Room() {
 
     return (
         <div className="app" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-            <canvas 
-                ref={canvasRef} 
-                onMouseDown={onMouseDown} 
-                onClick={addNote}
-            />
-
             {/* Flowing selection net */}
             <div 
                 className="selectionNet"
@@ -575,6 +577,12 @@ function Room() {
                     </div>
                 );
             })}
+
+            <canvas 
+                ref={canvasRef} 
+                onMouseDown={onMouseDown} 
+                onClick={addNote}
+            />
 
         </div>
     );
