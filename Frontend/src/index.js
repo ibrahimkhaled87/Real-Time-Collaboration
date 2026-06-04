@@ -6,7 +6,7 @@ import { LiveblocksProvider } from "@liveblocks/react";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
-import Whiteboard from "./pages/Whiteboard";
+import Whiteboard from "./features/whiteboard/Whiteboard";
 import Layout from "./pages/Layout";
 import { TeamsProvider } from "./context/TeamsContext";
 
