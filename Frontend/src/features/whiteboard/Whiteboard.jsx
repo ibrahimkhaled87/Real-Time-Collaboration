@@ -1,12 +1,8 @@
-import { User2Icon } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { RoomProvider, useBroadcastEvent } from "@liveblocks/react";
 import { useParams } from "react-router-dom";
-//global
-import { useFetchTeamMessages } from "../../hooks/useFetch";
+// hooks + components
 import useTokenDecode from "../../hooks/useTokenDecode";
-import api from "../../utils/axios";
-//feature
 import useCanvas from "./hooks/useCanvas";
 import useSticky from "./hooks/useSticky";
 import useSelectionNet from "./hooks/useSelectionNet";
@@ -17,8 +13,7 @@ import Presence from "./components/Presence";
 import Sticky from "./components/Sticky";
 
 function Room() {
-    const payload = useTokenDecode();
-    const [position, setPosition] = useState({x:0, y:0});
+    const [position, setPosition] = useState({x:0, y:0}); //For flowing tool
     const [selectedTool, setSelectedTool] = useState("pen");
     const broadcast = useBroadcastEvent();
     const onMouseDown = (e) => {
@@ -29,18 +24,13 @@ function Room() {
     }
 
 
-    /*usePresence*/
     const {others, handleMouseMove, handleMouseLeave} = usePresence({setPosition});
 
-    /*useCanvas*/
     const {canvasRef, width, draw} = useCanvas({broadcast, selectedTool});    
 
-    /*useSticky*/
-    const {stickyArr, setStickyArr, addNote, dragNote, cursor, stickyMouseMove, stickyInput, selectedId, setSelctedId, updateSelectedId} = useSticky({broadcast, selectedTool});
+    const sticky = useSticky({broadcast, selectedTool});
 
-    /*useSelectionNet*/
-    const {selectionNet, putSelectionNet} = useSelectionNet({setSelctedId});
-
+    const {selectionNet, putSelectionNet} = useSelectionNet(sticky.setSelctedId);
 
 
     return (
@@ -62,7 +52,7 @@ function Room() {
             />
 
             {/* Flowing sticky */}
-            <Sticky broadcast={broadcast} selectedTool={selectedTool} />
+            <Sticky broadcast={broadcast} selectedTool={selectedTool} {...sticky} />
 
             {/* Presence */}
             <Presence others={others} />
@@ -78,7 +68,7 @@ function Room() {
             <canvas 
                 ref={canvasRef} 
                 onMouseDown={onMouseDown} 
-                onClick={addNote}
+                onClick={sticky.addNote}
             />
 
         </div>

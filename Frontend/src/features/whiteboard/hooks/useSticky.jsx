@@ -4,6 +4,7 @@ import { useEventListener } from "@liveblocks/react";
 export default function useSticky({broadcast, selectedTool}) {
     const [stickyArr, setStickyArr] = useState([]);
     const addNote = (e) => {
+        console.log("ADD NOTE", selectedTool);
         if(selectedTool!=="sticky") return;
 
         const newSticky = {

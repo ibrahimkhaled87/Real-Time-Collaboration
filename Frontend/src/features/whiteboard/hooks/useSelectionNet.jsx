@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function useSelectionNet({setSelctedId}) {
+export default function useSelectionNet(setSelctedId) {
     const [selectionNet, setSelectionNet] = useState({
         x: 0,
         y: 0,

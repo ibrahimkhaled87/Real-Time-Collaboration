@@ -1,9 +1,7 @@
 import LayerSettings from "../../../components/LayerSettings";
 import useSticky from "../hooks/useSticky";
 
-export default function Sticky({broadcast, selectedTool}) {
-    const {stickyArr, setStickyArr, addNote, dragNote, cursor, stickyMouseMove, stickyInput, selectedId, setSelctedId, updateSelectedId} = useSticky({broadcast, selectedTool});
-
+export default function Sticky({broadcast, selectedTool, stickyArr, setStickyArr, dragNote, stickyMouseMove, stickyInput, updateSelectedId, selectedId, cursor}) {
     return <>
         {stickyArr.map(note => (
             <div 
