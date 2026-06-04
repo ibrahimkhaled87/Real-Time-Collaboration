@@ -8,13 +8,24 @@ import { useParams } from "react-router-dom";
 import LayerSettings from "../components/LayerSettings";
 
 function Room() {
+    // =============
+    // Globals
+    // =============
     const payload = useTokenDecode();
-
     const [position, setPosition] = useState({x:0, y:0});
-
+    const [seletedTool, setSelectedTool] = useState("pen");
     const broadcast = useBroadcastEvent();
+    const onMouseDown = (e) => {
+        if(seletedTool==="pen" || seletedTool==="eraser")
+            draw(e);
+        else if(seletedTool==="cursor")
+            putSelectionNet(e);
+    }
 
-    // Read other cursors
+
+    // =============
+    // Presence
+    // =============
     const others = useOthers();
     const updateMyPresence = useUpdateMyPresence();
 
@@ -36,10 +47,10 @@ function Room() {
         });
     };
 
-    // Selected tool
-    const [seletedTool, setSelectedTool] = useState("pen");
 
-    // Canvas setup
+    // =============
+    // Canvas
+    // =============
     const canvasRef = useRef(null);
     const [color, setColor] = useState("black");
     const [width, setWidth] = useState(3);
@@ -82,8 +93,6 @@ function Room() {
         ctx.strokeStyle = color;
     }, [color, width])
 
-    
-    // Canvas Draw
     const draw = (e) => {
         const ctx = canvasRef.current.getContext("2d");
         const startX = e.nativeEvent.offsetX;
@@ -124,13 +133,11 @@ function Room() {
     };
 
 
-    //Chat panel
+    // =============
+    // Chat panel
+    // =============
     const [show, setShow] = useState(false);
-
-    //Fetch messages
     const {messages, setMessages} = useFetchTeamMessages();
-
-    //Send new message
     const [newMessage, setNewMessage] = useState("");
     const sendMessage = async(e) => {
         e.preventDefault();
@@ -140,7 +147,9 @@ function Room() {
     }
 
 
-    //Canvas sticky
+    // =============
+    // Sticky
+    // =============
     const [stickyArr, setStickyArr] = useState([]);
     const addNote = (e) => {
         if(seletedTool!=="sticky") return;
@@ -161,6 +170,7 @@ function Room() {
             note: newSticky
         });
     }
+
     const dragNote = (e, note) => {
         if (e.target !== e.currentTarget) return; //inner != outer
         const rect = e.currentTarget.getBoundingClientRect();
@@ -300,6 +310,7 @@ function Room() {
             }, { once: true });
         }
     }
+
     const [cursor, setCursor] = useState("move");
     const stickyMouseMove = (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -325,6 +336,7 @@ function Room() {
         else
             setCursor("move");
     }
+
     const stickyInput = (e, note) => {
         const updatedContent = e.currentTarget.innerText;
         const updatedNote = {...note, content: updatedContent};   
@@ -341,7 +353,20 @@ function Room() {
         })
     }
 
-    //Selection net
+    const [selectedId, setSelctedId] = useState(null);
+    const updateSelectedId = (id) => {
+        if(seletedTool!=="cursor") return;
+            setSelctedId(id);
+    }
+    useEffect(() => {
+        if(seletedTool!=="cursor")
+            setSelctedId(null);
+    }, [seletedTool])
+
+    
+    // =============
+    // Selection net
+    // =============
     const [selectionNet, setSelectionNet] = useState({
         x: 0,
         y: 0,
@@ -373,13 +398,6 @@ function Room() {
             setSelectionNet(prev => ({x:0, y:0, height:0, width:0, visible: false}))
             window.removeEventListener("mousemove", move);
         }, { once: true });
-    }
-
-    const onMouseDown = (e) => {
-        if(seletedTool==="pen" || seletedTool==="eraser")
-            draw(e);
-        else if(seletedTool==="cursor")
-            putSelectionNet(e);
     }
 
 
@@ -420,19 +438,6 @@ function Room() {
 
     }
     });
-
-    const [selectedId, setSelctedId] = useState(null);
-    const updateSelectedId = (id) => {
-        if(seletedTool!=="cursor") return;
-            setSelctedId(id);
-    }
-    useEffect(() => {
-        if(seletedTool!=="cursor")
-            setSelctedId(null);
-    }, [seletedTool])
-    useEffect(()=> {
-        console.log(selectedId);
-    }, [selectedId])
 
 
     return (
