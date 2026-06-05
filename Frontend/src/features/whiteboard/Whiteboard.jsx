@@ -8,6 +8,7 @@ import Presence from "./components/Presence";
 import Toolbar from "./components/Toolbar";
 import ChatPanel from "./components/ChatPanel";
 import Canvas from "./components/Canvas";
+import { HistoryProvider } from "./context/HistoryContext";
 
 
 export function Room() {
@@ -59,7 +60,9 @@ export default function Whiteboard() {
             username: payload?.username,
             cursor: null 
         }}>
-            <Room />
+            <HistoryProvider>
+                <Room />
+            </HistoryProvider>
         </RoomProvider>
     );
 }

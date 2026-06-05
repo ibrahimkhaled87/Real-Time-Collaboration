@@ -1,8 +1,10 @@
+import { Undo2, Redo2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useEventListener, useBroadcastEvent } from "@liveblocks/react";
 import useTokenDecode from "../../../hooks/useTokenDecode";
 import LayerSettings from "./LayerSettings";
 import api from "../../../utils/axios";
+import { useHistory } from "../context/HistoryContext";
 
 export default function Canvas({selectedTool, position}) {
     const broadcast = useBroadcastEvent();
@@ -13,6 +15,48 @@ export default function Canvas({selectedTool, position}) {
             putSelectionNet(e);
     }
 
+    const {historyRef, redoRef} = useHistory();
+    const undo = () => {
+        const op = historyRef.current.pop();
+        if(!op) return;
+        redoRef.current.push(op);
+
+        switch(op.op) {
+            case "add-note":
+                setStickyArr(prev => prev.filter(el=>el.id!==op.note.id));
+                break;
+            case "note-update":
+                setStickyArr(prev => prev.map(el => el.id===op.after.id ? op.before : el));
+                break;
+            case "note-bring":
+                const arr = stickyArr.filter(el => el.id!==op.note.id);
+                arr.splice(op.previousIndex, 0, op.note);
+                setStickyArr(arr);
+                break;
+        }
+    }
+    const redo = () => {
+        const op = redoRef.current.pop();
+        if(!op) return;
+        historyRef.current.push(op);
+
+        switch(op.op) {
+            case "add-note":
+                setStickyArr(prev => [...prev.filter(el=>el.id!==op.note.id), op.note]);
+                break;
+            case "note-update":
+                setStickyArr(prev => prev.map(el => el.id===op.after.id ? op.after : el));
+                break;
+            case "note-bring":
+                if(op.position==="front")
+                    setStickyArr(prev => [...prev.filter(el => el.id!==op.note.id), op.note]);
+                else if(op.position==="back")
+                    setStickyArr(prev => [op.note, ...prev.filter(el => el.id!==op.note.id)]);
+                else
+                    setStickyArr(prev => prev.filter(el => el.id!==op.note.id));
+                break;
+        }
+    }
 
     // ===========
     // Canvas
@@ -128,6 +172,7 @@ export default function Canvas({selectedTool, position}) {
         window.addEventListener("mouseup", () => {
             broadcast("stop-draw");
             api.post(`teams/boards/${29}`, {op: "add-stroke", stroke: currentStroke});
+            historyRef.current.push({op: "add-stroke", stroke: currentStroke});
             window.removeEventListener("mousemove", move);
         })
     };
@@ -204,6 +249,7 @@ export default function Canvas({selectedTool, position}) {
         });
 
         await api.post(`/teams/boards/${29}`, {op: "add-note", note:newSticky});
+        historyRef.current.push({op: "add-note", note:newSticky});
     }
 
     const lastUpdate = useRef(0);
@@ -258,6 +304,7 @@ export default function Canvas({selectedTool, position}) {
             window.addEventListener("mousemove", move);
             window.addEventListener("mouseup", () => {
                 api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
+                historyRef.current.push({op:"note-update", before:note, after:lastUpdate.current});
                 window.removeEventListener("mousemove", move);
             }, { once: true });
         }
@@ -349,6 +396,7 @@ export default function Canvas({selectedTool, position}) {
             window.addEventListener("mousemove", resize);
             window.addEventListener("mouseup", () => {
                 api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
+                historyRef.current.push({op:"note-update", before:note, after:lastUpdate.current});
                 window.removeEventListener("mousemove", resize);
             }, { once: true });
         }
@@ -505,6 +553,11 @@ export default function Canvas({selectedTool, position}) {
                 transform: "translate(-50%, -50%)"
             }}
         />
+
+        <div className="flowing undo-redo">
+            <Undo2 className="tool" onClick={undo} color={historyRef.current.length ? "black" : "gray"}/>
+            <Redo2 className="tool" onClick={redo} color={redoRef.current.length ? "black" : "gray"}/>
+        </div>
 
         <canvas
             ref={canvasRef} 
