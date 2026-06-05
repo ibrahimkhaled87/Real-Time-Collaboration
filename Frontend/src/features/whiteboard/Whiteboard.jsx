@@ -12,6 +12,8 @@ import { HistoryProvider } from "./context/HistoryContext";
 
 
 export function Room() {
+    const {boardId} = useParams();
+
     const [selectedTool, setSelectedTool] = useState("pen");
     const [position, setPosition] = useState({x:0, y:0})
 
@@ -45,7 +47,7 @@ export function Room() {
 
         <ChatPanel />
         
-        <Canvas selectedTool={selectedTool} position={position} />
+        <Canvas selectedTool={selectedTool} position={position} boardId={boardId} />
     </div>
 }
 

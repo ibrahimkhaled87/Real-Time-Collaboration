@@ -6,7 +6,7 @@ import LayerSettings from "./LayerSettings";
 import api from "../../../utils/axios";
 import { useHistory } from "../context/HistoryContext";
 
-export default function Canvas({selectedTool, position}) {
+export default function Canvas({selectedTool, position, boardId}) {
     const broadcast = useBroadcastEvent();
     const onMouseDown = (e) => {
         if(selectedTool==="pen" || selectedTool==="eraser")
@@ -57,6 +57,23 @@ export default function Canvas({selectedTool, position}) {
                 break;
         }
     }
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            const ctrl = e.ctrlKey;
+            if (ctrl && e.key.toLowerCase() === "z" && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === "y") {
+                e.preventDefault();
+                redo();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [undo, redo]);
+
 
     // ===========
     // Canvas
@@ -171,7 +188,7 @@ export default function Canvas({selectedTool, position}) {
         window.addEventListener("mousemove", move);
         window.addEventListener("mouseup", () => {
             broadcast("stop-draw");
-            api.post(`teams/boards/${29}`, {op: "add-stroke", stroke: currentStroke});
+            api.post(`teams/boards/${boardId}`, {op: "add-stroke", stroke: currentStroke});
             historyRef.current.push({op: "add-stroke", stroke: currentStroke});
             window.removeEventListener("mousemove", move);
         })
@@ -222,9 +239,9 @@ export default function Canvas({selectedTool, position}) {
     const [stickyArr, setStickyArr] = useState([]);
     useEffect(()=> {
         const getData = async() => {
-            const response = await api.get(`/teams/boards/${29}`);
-            setStickyArr(response.data[0].notes || []);
-            setStrokes(response.data[0].strokes || []);
+            const response = await api.get(`/teams/boards/${boardId}`);
+            setStickyArr(response.data[0]?.notes || []);
+            setStrokes(response.data[0]?.strokes || []);
         }
         getData();
     }, [])
@@ -248,7 +265,7 @@ export default function Canvas({selectedTool, position}) {
             note: newSticky
         });
 
-        await api.post(`/teams/boards/${29}`, {op: "add-note", note:newSticky});
+        await api.post(`/teams/boards/${boardId}`, {op: "add-note", note:newSticky});
         historyRef.current.push({op: "add-note", note:newSticky});
     }
 
@@ -303,7 +320,7 @@ export default function Canvas({selectedTool, position}) {
 
             window.addEventListener("mousemove", move);
             window.addEventListener("mouseup", () => {
-                api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
+                api.post(`/teams/boards/${boardId}`, {op:"note-update", note:lastUpdate.current});
                 historyRef.current.push({op:"note-update", before:note, after:lastUpdate.current});
                 window.removeEventListener("mousemove", move);
             }, { once: true });
@@ -395,7 +412,7 @@ export default function Canvas({selectedTool, position}) {
 
             window.addEventListener("mousemove", resize);
             window.addEventListener("mouseup", () => {
-                api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
+                api.post(`/teams/boards/${boardId}`, {op:"note-update", note:lastUpdate.current});
                 historyRef.current.push({op:"note-update", before:note, after:lastUpdate.current});
                 window.removeEventListener("mousemove", resize);
             }, { once: true });
@@ -534,7 +551,7 @@ export default function Canvas({selectedTool, position}) {
                 }}
             >
                 {note.content}
-                {selectedId===note.id && <LayerSettings stickyArr={stickyArr} setStickyArr={setStickyArr} selectedId={selectedId} /> }
+                {selectedId===note.id && <LayerSettings stickyArr={stickyArr} setStickyArr={setStickyArr} selectedId={selectedId} boardId={boardId} /> }
             </div>
         ))}
 

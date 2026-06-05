@@ -3,7 +3,7 @@ import { BringToFrontIcon, SendToBackIcon, Trash2 } from "lucide-react"
 import api from "../../../utils/axios";
 import { useHistory } from "../context/HistoryContext";
 
-export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
+export default function LayerSettings({stickyArr, setStickyArr, selectedId, boardId}) {
     const broadcast = useBroadcastEvent();
     const {historyRef, undoRef} = useHistory();
 
@@ -20,7 +20,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
             note: updatedNote
         })
 
-        api.post("/teams/boards/29", {op:"note-update", note:updatedNote});
+        api.post(`/teams/boards/${boardId}`, {op:"note-update", note:updatedNote});
         historyRef.current.push({op:"note-update", before:note, after:updatedNote});
     }
 
@@ -36,7 +36,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "front",
                 note: note
             })
-            api.post("/teams/boards/29", {op:"note-bring", position:"front", note:note});
+            api.post(`/teams/boards/${boardId}`, {op:"note-bring", position:"front", note:note});
             historyRef.current.push({op:"note-bring", position:"front", previousIndex:previousIndex, note:note});
         }
         else if(position==="back") {
@@ -47,7 +47,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "back",
                 note: note
             })
-            api.post("/teams/boards/29", {op:"note-bring", position:"back", note:note});
+            api.post(`/teams/boards/${boardId}`, {op:"note-bring", position:"back", note:note});
             historyRef.current.push({op:"note-bring", position:"back", previousIndex:previousIndex, note:note});
         }
         else {
@@ -58,7 +58,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "delete",
                 note: note
             })
-            api.post("/teams/boards/29", {op:"note-bring", position:"delete", note:note});
+            api.post(`/teams/boards/${boardId}`, {op:"note-bring", position:"delete", note:note});
             historyRef.current.push({op:"note-bring", position:"delete", note:note});
         }
     }
