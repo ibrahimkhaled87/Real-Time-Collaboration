@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteTeam, deleteTeamBoard, deleteTeamMembers, getTeamBoards, getTeamMembers, getTeamMessages, getTeams, patchTeam, postTeam, postTeamBoard, postTeamMessage } from "../controllers/teamController.js";
+import { deleteTeam, deleteTeamBoard, deleteTeamMembers, getTeamBoards, getTeamMembers, getTeamMessages, getTeams, getWhiteboard, patchTeam, postTeam, postTeamBoard, postTeamMessage, postWhiteboard } from "../controllers/teamController.js";
 
 const router = Router();
 
@@ -13,6 +13,10 @@ router.patch("/:teamId", patchTeam);
 router.get("/:teamId/boards", getTeamBoards);
 router.delete("/:teamId/boards/:boardId", deleteTeamBoard);
 router.post("/:teamId/boards", postTeamBoard);
+
+//Board content
+router.get("/boards/:boardId", getWhiteboard);
+router.post("/boards/:boardId", postWhiteboard);
 
 //Messages
 router.get("/:teamId/messages", getTeamMessages);

@@ -88,6 +88,57 @@ export const deleteTeamBoard = async(req, res) => {
 }
 
 
+// Board Content
+export const getWhiteboard = async(req, res) => {
+    console.log("GET whiteboard called");
+    console.log(req.params);
+    const {boardId} = req.params;
+
+    const data = await db.query("SELECT * FROM workspace_whiteboard WHERE board_id=$1", [boardId]);
+    console.log(data.rows);
+    res.json(data.rows);
+}
+
+export const postWhiteboard = async(req, res) => {
+    console.log("POST whiteboard called");
+    console.log(req.params);
+    const {boardId} = req.params;
+    console.log(req.body);
+    const {op, position, note, stroke} = req.body;
+
+    const data = await db.query("SELECT notes, strokes FROM workspace_whiteboard WHERE board_id=$1", [boardId]);
+    let notes = data.rows[0]?.notes || [];
+    let strokes = data.rows[0]?.strokes || [];
+    switch (op) {
+        case "add-note":
+            notes.push(note);
+            break;
+        case "note-update":
+            notes = notes.map(el => el.id===note.id? note : el);
+            break;
+        case "note-bring":
+            if(position==="front")
+                notes = [...notes.filter(el => el.id!==note.id), note];
+            else if(position==="back")
+                notes = [note, ...notes.filter(el => el.id!==note.id)];
+            else
+                notes = notes.filter(el => el.id!==note.id);
+            break;
+        case "add-stroke":
+            strokes.push(stroke);
+            break;
+    }
+    await db.query(`
+        INSERT INTO workspace_whiteboard(board_id, notes, strokes)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (board_id)
+        DO UPDATE SET notes = $2, strokes = $3
+    `, [boardId, JSON.stringify(notes), JSON.stringify(strokes)]);
+    res.json({ success: true });
+}
+
+
+
 // Messages
 export const getTeamMessages = async(req, res) => {
     console.log("GET team messages called");

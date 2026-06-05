@@ -1,5 +1,6 @@
 import { useBroadcastEvent } from "@liveblocks/react";
 import { BringToFrontIcon, SendToBackIcon, Trash2 } from "lucide-react"
+import api from "../../../utils/axios";
 
 export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
     const broadcast = useBroadcastEvent();
@@ -16,6 +17,8 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
             type: "note-update",
             note: updatedNote
         })
+
+        api.post("/teams/boards/29", {op:"note-update", note:updatedNote});
     }
 
     const handleBring = (position) => {
@@ -29,6 +32,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "front",
                 note: note
             })
+            api.post("/teams/boards/29", {op:"note-bring", position:"front", note:note});
         }
         else if(position==="back") {
             const updatedArr = [note, ...stickyArr.filter(el=>el.id!==selectedId)];
@@ -38,6 +42,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "back",
                 note: note
             })
+            api.post("/teams/boards/29", {op:"note-bring", position:"back", note:note});
         }
         else {
             const updatedArr = [...stickyArr.filter(el=>el.id!==selectedId)];
@@ -47,6 +52,7 @@ export default function LayerSettings({stickyArr, setStickyArr, selectedId}) {
                 position: "delete",
                 note: note
             })
+            api.post("/teams/boards/29", {op:"note-bring", position:"delete", note:note});
         }
     }
 

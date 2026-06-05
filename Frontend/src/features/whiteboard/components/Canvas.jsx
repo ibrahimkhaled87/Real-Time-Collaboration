@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useEventListener, useBroadcastEvent } from "@liveblocks/react";
 import useTokenDecode from "../../../hooks/useTokenDecode";
-import LayerSettings from "../../../components/LayerSettings";
+import LayerSettings from "./LayerSettings";
+import api from "../../../utils/axios";
 
 export default function Canvas({selectedTool, position}) {
     const broadcast = useBroadcastEvent();
@@ -58,7 +59,31 @@ export default function Canvas({selectedTool, position}) {
         ctx.strokeStyle = color;
     }, [color, width])
 
+    //Fetch
+    const [strokes, setStrokes] = useState([]);
+    const drawStrokes = (strokes) => {
+        const ctx = canvasRef.current.getContext("2d");
+
+        strokes.forEach(stroke => {
+            ctx.beginPath();
+            ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+
+            for (let i = 1; i < stroke.points.length; i++) {
+                const p = stroke.points[i];
+                ctx.lineTo(p.x, p.y);
+            }
+
+            ctx.strokeStyle = stroke.color;
+            ctx.lineWidth = stroke.width;
+            ctx.stroke();
+        });
+    };
+    useEffect(()=>{
+        drawStrokes(strokes);
+    }, [strokes])
+
     //Canvas draw
+    let currentStroke = null;
     const draw = (e) => {
         const ctx = canvasRef.current.getContext("2d");
         const startX = e.nativeEvent.offsetX;
@@ -72,6 +97,12 @@ export default function Canvas({selectedTool, position}) {
             width,
             color
         });
+        currentStroke = {
+            id: Date.now(),
+            color,
+            width,
+            points: [{ startX, startY }]
+        };
 
         const move = (ev) => {
             const rect = canvasRef.current.getBoundingClientRect();
@@ -89,11 +120,14 @@ export default function Canvas({selectedTool, position}) {
                 x,
                 y
             });
+            
+            currentStroke.points.push({ x, y });
         };
 
         window.addEventListener("mousemove", move);
         window.addEventListener("mouseup", () => {
             broadcast("stop-draw");
+            api.post(`teams/boards/${29}`, {op: "add-stroke", stroke: currentStroke});
             window.removeEventListener("mousemove", move);
         })
     };
@@ -141,7 +175,16 @@ export default function Canvas({selectedTool, position}) {
     // Sticky
     // ========
     const [stickyArr, setStickyArr] = useState([]);
-    const addNote = (e) => {
+    useEffect(()=> {
+        const getData = async() => {
+            const response = await api.get(`/teams/boards/${29}`);
+            setStickyArr(response.data[0].notes || []);
+            setStrokes(response.data[0].strokes || []);
+        }
+        getData();
+    }, [])
+
+    const addNote = async(e) => {
         if(selectedTool!=="sticky") return;
 
         const newSticky = {
@@ -159,8 +202,11 @@ export default function Canvas({selectedTool, position}) {
             type: "new-note",
             note: newSticky
         });
+
+        await api.post(`/teams/boards/${29}`, {op: "add-note", note:newSticky});
     }
 
+    const lastUpdate = useRef(0);
     const dragNote = (e, note) => {
         if (e.target !== e.currentTarget) return; //inner != outer
         const rect = e.currentTarget.getBoundingClientRect();
@@ -205,10 +251,13 @@ export default function Canvas({selectedTool, position}) {
                     type: "note-update",
                     note: updatedNote
                 });
+
+                lastUpdate.current = updatedNote;
             };
 
             window.addEventListener("mousemove", move);
             window.addEventListener("mouseup", () => {
+                api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
                 window.removeEventListener("mousemove", move);
             }, { once: true });
         }
@@ -292,10 +341,14 @@ export default function Canvas({selectedTool, position}) {
                     type: "note-update",
                     note: updatedNote
                 })
+
+
+                lastUpdate.current = updatedNote;
             };
 
             window.addEventListener("mousemove", resize);
             window.addEventListener("mouseup", () => {
+                api.post("/teams/boards/29", {op:"note-update", note:lastUpdate.current});
                 window.removeEventListener("mousemove", resize);
             }, { once: true });
         }
