@@ -17,15 +17,16 @@ export function useFetchTeamBoards(team) {
     return {boards, setBoards};
 }
 
-export function useFetchTeamMessages() {
+export function useFetchTeamMessages(team) {
     const [messages, setMessages] = useState([]);
     useEffect(() => {
+        if(!team) return;
         const getData = async() => {
-            const response = await api.get(`/teams/${1}/messages`);
+            const response = await api.get(`/teams/${team}/messages`);
             setMessages(response.data);
         }
         getData();
-    }, [])
+    }, [team])
 
     return {messages, setMessages};
 }

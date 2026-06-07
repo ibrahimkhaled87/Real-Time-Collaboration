@@ -41,7 +41,7 @@ export default function Boards({team}) {
     });
     
 
-    if(!boards) return <EmptyBoards />
+    if(!boards.length) return <EmptyBoards />
 
     return <div className="boards">
         <Toaster position="top-center" duration="2000" />
@@ -51,7 +51,7 @@ export default function Boards({team}) {
             <span>New board</span>
         </div>
         {boards?.map(board => (
-            <div className="card board" onClick={()=>navigate(`/board/${board.id}`)}>
+            <div className="card board" onClick={()=>navigate(`/team/${team}/board/${board.id}`)}>
                 <p className="delete" onClick={(e)=>deleteBoard(e, board.id)} >&times;</p>
                 <div className="image"></div>
                 <div className="info">

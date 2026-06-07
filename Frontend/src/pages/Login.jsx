@@ -17,7 +17,6 @@ export default function Login() {
 
     const login = async(e) => {
         e.preventDefault();
-        console.log(process.env.REACT_APP_API_URL);
         try {
             const response = await api.post("/auth/login", form);
             localStorage.setItem("token", response.data.token);
@@ -40,5 +39,7 @@ export default function Login() {
             <input type="password" name="password" placeholder="Enter password" required onChange={handleChange}/>
             <button type="submit">Login</button>
         </form>
+
+        <p>Don't have an account? <span onClick={()=>navigate("/signup")} style={{color: "blue", textDecoration: "underline", cursor: "pointer"}}>Signup</span></p>
     </div>
 }

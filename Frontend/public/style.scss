@@ -28,7 +28,7 @@ body {
 
 // Pages
 
-.login {
+.login, .signup {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -41,6 +41,11 @@ body {
         justify-content: center;
         align-items: center;
         gap: 1em;
+        .entry {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+        }
         input, button {
             width: 20em;
         }
@@ -310,6 +315,7 @@ body {
         transition: all 0.5s ease-in-out;
         display: flex;
         flex-direction: column;
+        z-index: 10;
         .section {
             padding: 1em;
         }

@@ -1,24 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User2Icon, MessageSquareMoreIcon, Send } from "lucide-react";
-import { useEventListener } from "@liveblocks/react";
+import { RoomProvider, useEventListener, useOthers, useUpdateMyPresence } from "@liveblocks/react";
 import { useFetchTeamMessages } from "../../../hooks/useFetch";
 import api from "../../../utils/axios";
 import useTokenDecode from "../../../hooks/useTokenDecode";
+import { useParams } from "react-router-dom";
 
-export default function ChatPanel() {
+function Room() {
+    const {teamId} = useParams(); 
     const payload = useTokenDecode();
 
     const [show, setShow] = useState(false);
-
-    const {messages, setMessages} = useFetchTeamMessages();
+    const {messages, setMessages} = useFetchTeamMessages(teamId);
     
     const [newMessage, setNewMessage] = useState("");
     const sendMessage = async(e) => {
         e.preventDefault();
 
-        await api.post(`/teams/${1}/messages`, {message:newMessage, sender:payload.username});
+        await api.post(`/teams/${teamId}/messages`, {message:newMessage, sender:payload.username});
         setNewMessage("");
     }
+
+    //Typing emit, listen
+    const others = useOthers();
+    const updateMyPresence = useUpdateMyPresence();
+    useEffect(()=>{
+        if(newMessage)
+            updateMyPresence({
+                username: payload?.username,
+                typing: true
+            })
+        else
+            updateMyPresence({
+                typing: false
+            })
+    }, [newMessage])
+
 
     //Listen backend
     useEventListener(({ event }) => {
@@ -41,6 +58,9 @@ export default function ChatPanel() {
                 <h2 className="close" onClick={()=>setShow(false)}>&times;</h2>
             </div>
             <div className="section messages">
+                {others.map(({connectionId, presence}) => (
+                    presence.typing ? <p>...{presence.username} is typing</p> : null
+                ))}
                 {messages?.map(message => (
                     <div className={`area ${message.sender===payload.username && "mine"}`}>
                         {message.sender!==payload.username && <User2Icon />}
@@ -57,4 +77,14 @@ export default function ChatPanel() {
             </form>
         </div>
     </>
+}
+
+export default function ChatPanel() {
+    const {teamId} = useParams(); 
+
+    return (
+        <RoomProvider id={`team:${teamId}`}>
+            <Room />
+        </RoomProvider>
+    )
 }

@@ -159,7 +159,7 @@ export const postTeamMessage = async(req, res) => {
     const data = await db.query("INSERT INTO workspace_messages(workspace_id, message, sender) VALUES($1, $2, $3) RETURNING *", [teamId, message, sender]);
     res.json("Inserted message");
 
-    await liveblocks.broadcastEvent("board:29", {
+    await liveblocks.broadcastEvent(`team:${teamId}`, {
         type: "new-message",
         message: data.rows[0]
     });

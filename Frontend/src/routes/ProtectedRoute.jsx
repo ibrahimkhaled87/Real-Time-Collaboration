@@ -1,6 +1,7 @@
 import { RoomProvider } from "@liveblocks/react";
 import { Navigate } from "react-router-dom";
 import useTokenDecode from "../hooks/useTokenDecode";
+import { useTeams } from "../context/TeamsContext";
 
 export default function ProtectedRoute({children}) {
     const token = localStorage.getItem("token");

@@ -25,7 +25,7 @@ body button:hover {
   background-color: rgb(212, 138, 0);
 }
 
-.login {
+.login, .signup {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -33,14 +33,19 @@ body button:hover {
   gap: 2em;
   height: 100vh;
 }
-.login form {
+.login form, .signup form {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 1em;
 }
-.login form input, .login form button {
+.login form .entry, .signup form .entry {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.login form input, .login form button, .signup form input, .signup form button {
   width: 20em;
 }
 
@@ -298,6 +303,7 @@ body button:hover {
   transition: all 0.5s ease-in-out;
   display: flex;
   flex-direction: column;
+  z-index: 10;
 }
 .app .chat-panel .section {
   padding: 1em;

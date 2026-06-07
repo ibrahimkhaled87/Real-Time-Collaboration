@@ -1,5 +1,9 @@
+import { useParams } from "react-router-dom";
+
 export default function Context() {
+    const {teamId} = useParams(); 
+
     return <div className="flowing context">
-        <p>Team 1</p>
+        <p>Team {teamId}</p>
     </div>
 }

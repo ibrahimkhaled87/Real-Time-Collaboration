@@ -6,6 +6,7 @@ import { LiveblocksProvider } from "@liveblocks/react";
 import PublicOnlyRoute from "./routes/PublicOnlyRoute";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Whiteboard from "./features/whiteboard/Whiteboard";
 import Layout from "./pages/Layout";
 import { TeamsProvider } from "./context/TeamsContext";
@@ -20,6 +21,13 @@ const router = createBrowserRouter([
         </PublicOnlyRoute>
     },
     {
+        path: "/signup",
+        element: 
+        <PublicOnlyRoute>
+            <Signup />
+        </PublicOnlyRoute>
+    },
+    {
         path: "/app",
         element: 
         <ProtectedRoute>
@@ -27,7 +35,7 @@ const router = createBrowserRouter([
         </ProtectedRoute>
     },
     {
-        path: "/board/:boardId",
+        path: "team/:teamId/board/:boardId",
         element: 
         <ProtectedRoute>
             <Whiteboard />
