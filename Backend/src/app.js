@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import liveblocksRoutes from "./routes/liveblocksRoutes.js";
 
 const app = express();
 
@@ -16,9 +17,10 @@ app.use(cors({
 }));
 
 // Routes
-app.use("/auth", authRoutes)
+app.use("/auth", authRoutes);
 app.use("/teams", teamRoutes);
-app.use("/users", userRoutes)
+app.use("/users", userRoutes);
+app.use("/api", liveblocksRoutes);
 
 
 export default app;
