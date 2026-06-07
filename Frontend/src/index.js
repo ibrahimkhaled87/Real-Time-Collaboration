@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Whiteboard from "./features/whiteboard/Whiteboard";
 import Layout from "./pages/Layout";
 import { TeamsProvider } from "./context/TeamsContext";
+import api from "./utils/axios";
 
 const router = createBrowserRouter([
     {
@@ -38,7 +39,10 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
-        <LiveblocksProvider publicApiKey={process.env.REACT_APP_LIVEBLOCKS_PUBLIC_API_KEY} >
+        <LiveblocksProvider authEndpoint={async(room) => {
+            const response = await api.post("/api/liveblocks-auth", room? {room} : {})
+            return response.data;
+        }} >
             <TeamsProvider>
                 <RouterProvider router={router} />
             </TeamsProvider>
