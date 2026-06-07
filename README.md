@@ -4,7 +4,7 @@ Live Demo:
 https://real-time-collaboration-drab.vercel.app
 
 Technologies Used:
-- Frontend: React.js, SCSS
+- Frontend: React.js, SCSS, Context API
 - Backend: Node.js, Express
 - Database: PostgreSQL
 - Real-time Service: Liveblocks
@@ -13,7 +13,7 @@ Features Implemented:
 - Signup/login authentication using jwt and bcrypt + protected routes
 - Create teams, invite members, and manage team (members/settings)
 - Real time notifications for user
-- Collaborative whiteboards (live cursors, chat, board updates)
+- Collaborative whiteboards featuring live cursors, chat, and board updates
 - Persistent data storage using PostgreSQL
 - Authentication middlewares to protect data/board access for authorized users only
 
