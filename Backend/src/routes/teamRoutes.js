@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { protect } from "../middleware/authMiddleware.js";
+import { requireBoardMember } from "../middleware/boardMiddleware.js";
 import { deleteTeam, deleteTeamBoard, deleteTeamMembers, getTeamBoards, getTeamMembers, getTeamMessages, getTeams, getWhiteboard, patchTeam, postTeam, postTeamBoard, postTeamMessage, postWhiteboard } from "../controllers/teamController.js";
 
 const router = Router();
@@ -15,8 +17,8 @@ router.delete("/:teamId/boards/:boardId", deleteTeamBoard);
 router.post("/:teamId/boards", postTeamBoard);
 
 //Board content
-router.get("/boards/:boardId", getWhiteboard);
-router.post("/boards/:boardId", postWhiteboard);
+router.get("/boards/:boardId", protect, requireBoardMember, getWhiteboard);
+router.post("/boards/:boardId", protect, requireBoardMember, postWhiteboard);
 
 //Messages
 router.get("/:teamId/messages", getTeamMessages);

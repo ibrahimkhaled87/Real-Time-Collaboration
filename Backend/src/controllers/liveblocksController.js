@@ -1,5 +1,5 @@
-import db from "../config/db";
-import { liveblocks } from "../config/liveblocks";
+import db from "../config/db.js";
+import { liveblocks } from "../config/liveblocks.js";
 
 const isTeamMember = async(username, team) => {
     const data = await db.query(`SELECT DISTINCT w.id 
@@ -33,7 +33,7 @@ export const liveblocksAuth = async(req, res) => {
     const session = liveblocks.prepareSession(username);
 
     if(room==="app-room") {
-        session.allow(room, session.READ_WRITE);
+        session.allow(room, session.FULL_ACCESS);
     }
 
     else if(room.startsWith("user:")) {

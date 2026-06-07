@@ -5,6 +5,7 @@ import useTokenDecode from "../../../hooks/useTokenDecode";
 import LayerSettings from "./LayerSettings";
 import api from "../../../utils/axios";
 import { useHistory } from "../context/HistoryContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Canvas({selectedTool, position, boardId}) {
     const broadcast = useBroadcastEvent();
@@ -237,11 +238,17 @@ export default function Canvas({selectedTool, position, boardId}) {
     // Sticky
     // ========
     const [stickyArr, setStickyArr] = useState([]);
+    const navigate = useNavigate();
     useEffect(()=> {
         const getData = async() => {
-            const response = await api.get(`/teams/boards/${boardId}`);
-            setStickyArr(response.data[0]?.notes || []);
-            setStrokes(response.data[0]?.strokes || []);
+            try {
+                const response = await api.get(`/teams/boards/${boardId}`);
+                setStickyArr(response.data[0]?.notes || []);
+                setStrokes(response.data[0]?.strokes || []);
+            } catch (error) {
+                // alert(error.response?.data?.message);
+                navigate("/app");
+            }
         }
         getData();
     }, [])
