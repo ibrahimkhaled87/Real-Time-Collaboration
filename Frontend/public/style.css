@@ -110,7 +110,6 @@ body button:hover {
 }
 .layout .right .top-nav .switcher {
   margin-right: auto;
-  width: 14em;
 }
 .layout .right .top-nav .search {
   display: none;
@@ -132,6 +131,7 @@ body button:hover {
 .layout .right .top-nav button {
   height: 100%;
   border-radius: 5px;
+  box-sizing: border-box;
   color: black;
   font-weight: 600;
   border: 1px solid rgb(170, 170, 170);
@@ -505,7 +505,7 @@ body button:hover {
 
 .switcher {
   cursor: pointer;
-  width: 12em;
+  width: max-content;
   height: 100%;
 }
 .switcher .box {

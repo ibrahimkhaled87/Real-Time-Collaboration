@@ -104,7 +104,6 @@ export default function Overlay({info, onClose, setTeams}) {
           <form onSubmit={createBoard}>
             <input type="text" name="name" value={newBoard.name} placeholder="Board name" onChange={handleChange} />
             <select name="type" onChange={handleChange}>
-              <option value="kanban">Kanban</option>
               <option value="whiteboard">Whiteboard</option>
             </select>
             <button>Create Board</button>
