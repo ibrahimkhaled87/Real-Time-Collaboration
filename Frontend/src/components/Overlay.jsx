@@ -63,7 +63,9 @@ export default function Overlay({info, onClose, setTeams}) {
   const [invited, setInvited] = useState("");
   const sendInvitation = async(e, team) => {
     // to backend notification
+    e.preventDefault();
     await api.post(`/users/${invited}/notifications`, {notification: `You've been invited to join team ${team}`, type: "invitation"});
+    onClose();
   }
 
 
